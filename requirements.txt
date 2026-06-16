@@ -1,0 +1,8 @@
+streamlit
+pandas
+numpy
+sqlalchemy
+werkzeug
+supabase
+mlxtend
+prefixspan
