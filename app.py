@@ -614,7 +614,8 @@ if not st.session_state.db_connected:
         st.session_state.db_engine    = engine
         st.session_state.db_connected = True
     except Exception:
-        pass
+        st.error(f"DB ERROR: {e}")
+        raise
 
 
 # =============================================================================

@@ -6,3 +6,4 @@ werkzeug
 supabase
 mlxtend
 prefixspan
+psycopg2-binary
