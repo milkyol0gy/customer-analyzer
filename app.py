@@ -613,7 +613,7 @@ if not st.session_state.db_connected:
             conn.execute(text("SELECT 1"))
         st.session_state.db_engine    = engine
         st.session_state.db_connected = True
-    except Exception:
+    except Exception as e:
         st.error(f"DB ERROR: {e}")
         raise
 
@@ -1130,6 +1130,13 @@ elif selected_menu == "Multidimensional Association Rules":
                     else:
                         st.warning("Kolom voucher tidak ditemukan — dimensi Voucher dilewati.")
                         selected_dimension_labels = [d for d in selected_dimension_labels if d != "Voucher"]
+
+                if selected_product_types is not None:
+                    if "Tipe Produk" in working_df.columns:
+                        if "Madu" in selected_product_types:
+                            working_df['item_product'] = "PROD=" + working_df[working_df['Jenis Produk'] == "Madu"]['Nama Produk']
+                        else:
+                            working_df['item_product'] = "PROD=" + working_df['Tipe Produk']
 
             # Terapkan filter jenis produk SETELAH encoding dimensi
             # agar quantile diskon tidak berubah saat filter berbeda
