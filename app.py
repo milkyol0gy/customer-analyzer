@@ -1141,6 +1141,18 @@ elif selected_menu == "Multidimensional Association Rules":
                     f"{before_filter_count:,} → {len(working_df):,} baris."
                 )
 
+            # - Jenis "Madu" → gunakan Nama Produk (variannya banyak dan spesifik)
+            # - Jenis lainnya → gunakan Tipe Produk (lebih general/ringkas)
+            if "Nama Produk" in selected_dimension_labels and "item_product" in working_df.columns:
+                if "Tipe Produk" in working_df.columns:
+                    working_df["item_product"] = "PROD=" + np.where(
+                        working_df["Jenis Produk"] == "Madu",
+                        working_df["Nama Produk"],
+                        working_df["Tipe Produk"]
+                    )
+                else:
+                    st.warning("Kolom 'Tipe Produk' tidak ditemukan — semua item_product tetap menggunakan Nama Produk.")
+
             if len(working_df) == 0:
                 st.error("Tidak ada data setelah filter jenis produk.")
                 st.stop()
@@ -1148,7 +1160,6 @@ elif selected_menu == "Multidimensional Association Rules":
             with st.spinner("Membangun item per dimensi..."):
                 # Peta dimensi ke kolom item dan prefix label
                 simple_dimension_map = {
-                    "Nama Produk":      ("item_product",  "Nama Produk",      "PROD="),
                     "Waktu (Jam)":      ("item_time",     "Jam",              "TIME="),
                     "Hari":             ("item_day",      "Hari",             "DAY="),
                     "Bulan":            ("item_month",    "Bulan",            "MONTH="),
