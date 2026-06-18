@@ -1532,10 +1532,10 @@ elif selected_menu == "Sequential Pattern Mining":
 
                     gap_array = np.array(gap_days_list)
                     return {
-                        "mean":   round(float(np.mean(gap_array)),   1),
-                        "median": round(float(np.median(gap_array)), 1),
-                        "min":    int(np.min(gap_array)),
-                        "max":    int(np.max(gap_array)),
+                        "mean": round(float(np.mean(gap_array)), 3),
+                        "median": round(float(np.median(gap_array)), 3),
+                        "min": round(float(np.min(gap_array)),3),
+                        "max": round(float(np.max(gap_array)),3),
                     }
 
                 pattern_rows = []
