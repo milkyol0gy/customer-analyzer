@@ -1260,8 +1260,6 @@ elif selected_menu == "Multidimensional Association Rules":
             st.session_state.mdar_rules_with_product = rules_with_product
             st.session_state.mdar_covered_products   = covered_products
 
-            st.write(rules_df.head())
-
             st.success(
                 f"Selesai! {len(rules_with_product)} rules melibatkan produk dari {len(covered_products)} produk "
             )
