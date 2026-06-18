@@ -1516,7 +1516,7 @@ elif selected_menu == "Sequential Pattern Mining":
                                         if user_timeline[j][0] == next_item:
                                             gap_days = (user_timeline[j][1] - current_ts).days
                                             if gap_days == 0:
-                                                gap_days = (user_timeline[j][1] - current_ts).total_seconds / (24*3600)
+                                                gap_days = (user_timeline[j][1] - current_ts).total_seconds() / (24*3600)
                                             gap_days_list.append(gap_days)
                                             current_idx = j
                                             current_ts  = user_timeline[j][1]
