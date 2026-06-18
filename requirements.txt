@@ -7,3 +7,4 @@ supabase
 mlxtend
 prefixspan
 psycopg2-binary
+openpyxl
