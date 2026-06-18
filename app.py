@@ -629,6 +629,8 @@ if not st.session_state.authenticated:
         <h2 style='text-align:center;margin-bottom:1.5rem'>🛒 Shopee Analyzer</h2>
     </div>
     """, unsafe_allow_html=True)
+    st.write(type(st.session_state.db_engine))
+    st.write(st.session_state.db_engine)
 
     _, col_center, _ = st.columns([1, 1.5, 1])
     with col_center:
