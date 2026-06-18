@@ -47,6 +47,9 @@ section[data-testid="stSidebar"] { min-width: 240px; max-width: 270px; }
 # CONSTANTS
 # =============================================================================
 
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+
 # Kolom kunci untuk mendeteksi duplikat saat menyimpan ke database
 DEDUP_KEY_COLS = ["No. Pesanan", "Nama Produk"]
 
