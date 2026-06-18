@@ -1719,7 +1719,7 @@ elif selected_menu == "Sequential Pattern Mining":
                             "Filter Promotion Window:",
                             options=active_windows,
                             default=active_windows,
-                            key="spm_window_filter"
+                            key="spm_window_filter_db"
                         )
                         display_patterns = spm_db_df[
                             (spm_db_df["Panjang Pola"] >= len_range[0]) &
