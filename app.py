@@ -47,14 +47,6 @@ section[data-testid="stSidebar"] { min-width: 240px; max-width: 270px; }
 # CONSTANTS
 # =============================================================================
 
-DB_DEFAULT = {
-    "host": "localhost",
-    "port": "5433",
-    "name": "db_skripsi",
-    "user": "skripsi_user",
-    "pass": "Password123",
-}
-
 # Kolom kunci untuk mendeteksi duplikat saat menyimpan ke database
 DEDUP_KEY_COLS = ["No. Pesanan", "Nama Produk"]
 
@@ -175,7 +167,7 @@ ALL_MDAR_DIMENSIONS = {
 # =============================================================================
 
 def normalize_product_name(name):
-    """Normalisasi nama produk: hapus spasi berlebih, konversi unicode, lowercase."""
+    # Normalisasi nama produk: hapus spasi berlebih, konversi unicode, lowercase.
     if pd.isna(name):
         return ""
     name = str(name).strip()
@@ -185,11 +177,9 @@ def normalize_product_name(name):
 
 
 def parse_indonesian_number(series: pd.Series) -> pd.Series:
-    """
-    Konversi kolom numerik dari format Indonesia (titik sebagai pemisah ribuan,
-    koma sebagai desimal) ke integer Python.
-    Contoh: '1.500,50' → 1500, 'Rp 25.000' → 25000
-    """
+    # Konversi kolom numerik dari format Indonesia (titik sebagai pemisah ribuan,
+    # koma sebagai desimal) ke integer Python.
+    # Contoh: '1.500,50' → 1500, 'Rp 25.000' → 25000
     if pd.api.types.is_numeric_dtype(series):
         return series.fillna(0).round().astype(int)
 
@@ -214,7 +204,7 @@ def parse_indonesian_number(series: pd.Series) -> pd.Series:
 
 
 def categorize_hour_to_session(hour):
-    """Konversi jam (0-23) ke sesi waktu: Morning, Afternoon, Evening, Night."""
+    # Konversi jam (0-23) ke sesi waktu: Morning, Afternoon, Evening, Night.
     if 5 <= hour <= 11:
         return "Morning"
     elif 12 <= hour <= 16:
@@ -226,7 +216,7 @@ def categorize_hour_to_session(hour):
 
 
 def combine_product_and_variation(row):
-    """Gabungkan nama produk dengan kata pertama variasi jika ada."""
+    # Gabungkan nama produk dengan kata pertama variasi jika ada.
     product_name = str(row["Nama Produk"]).strip()
     variation    = row.get("Nama Variasi", None)
     if pd.isna(variation) or str(variation).lower() == "nan":
@@ -235,10 +225,8 @@ def combine_product_and_variation(row):
 
 
 def add_product_maturity_label(df, product_col, date_col, threshold_months=3):
-    """
-    Tambahkan kolom 'Product Maturity' berdasarkan rentang kemunculan produk.
-    Produk dengan usia < threshold_months dikategorikan sebagai 'New Product'.
-    """
+    # Tambahkan kolom 'Product Maturity' berdasarkan rentang kemunculan produk.
+    # Produk dengan usia < threshold_months dikategorikan sebagai 'New Product'.
     df = df.copy()
     df[date_col] = pd.to_datetime(df[date_col])
 
@@ -262,14 +250,14 @@ def add_product_maturity_label(df, product_col, date_col, threshold_months=3):
 
 
 def frozenset_to_readable_string(value):
-    """Konversi frozenset hasil association rules ke string yang bisa dibaca."""
+    # Konversi frozenset hasil association rules ke string yang bisa dibaca.
     if isinstance(value, frozenset):
         return ", ".join(sorted(value))
     return str(value)
 
 
 def filter_dataframe_by_period(df, date_col, year_range, month_range):
-    """Filter dataframe berdasarkan rentang tahun dan bulan yang dipilih."""
+    # Filter dataframe berdasarkan rentang tahun dan bulan yang dipilih.
     df = df.copy()
     df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
     mask = (
@@ -282,7 +270,7 @@ def filter_dataframe_by_period(df, date_col, year_range, month_range):
 
 
 def render_period_filter_widgets(df, date_col="Waktu Pesanan Dibuat", key_prefix=""):
-    """Tampilkan selectbox tahun dan bulan awal/akhir, kembalikan tuple range."""
+    # Tampilkan selectbox tahun dan bulan awal/akhir, kembalikan tuple range.
     if date_col not in df.columns:
         return (2023, 2025), (1, 12)
 
@@ -305,7 +293,7 @@ def render_period_filter_widgets(df, date_col="Waktu Pesanan Dibuat", key_prefix
 
 
 def show_metric_explanation():
-    """Tampilkan penjelasan support, confidence, dan lift dalam expander."""
+    # Tampilkan penjelasan support, confidence, dan lift dalam expander.
     with st.expander("Penjelasan Support, Confidence, dan Lift", expanded=False):
         st.markdown("""
 **Support** = seberapa sering kombinasi produk muncul di seluruh transaksi.
@@ -320,10 +308,9 @@ Nilai minimum default adalah 1.
 
 
 def estimate_bundling_price(antecedent_str, consequent_str, df, discount=BUNDLING_DISCOUNT_RATE):
-    """
-    Estimasi harga bundling dari dua itemset dengan mengurangi diskon.
-    Mengambil harga terakhir (terbaru) dari setiap produk di dataset.
-    """
+    
+    # Estimasi harga bundling dari dua itemset dengan mengurangi diskon.
+    # Mengambil harga terakhir (terbaru) dari setiap produk di dataset.
     if "Nama Produk" not in df.columns or "Harga Awal" not in df.columns:
         return "N/A"
 
@@ -352,10 +339,8 @@ def estimate_bundling_price(antecedent_str, consequent_str, df, discount=BUNDLIN
 
 
 def categorize_promotion_window(median_days):
-    """
-    Kategorikan median jarak waktu antar pembelian (dalam hari)
-    ke dalam jendela promosi yang direkomendasikan.
-    """
+    # Kategorikan median jarak waktu antar pembelian (dalam hari)
+    # ke dalam jendela promosi yang direkomendasikan.
     if median_days is None or pd.isna(median_days):
         return "Tidak Diketahui"
     if median_days <= 7:
@@ -371,11 +356,9 @@ def categorize_promotion_window(median_days):
 
 
 def parse_threshold_input(raw_input, default_value):
-    """
-    Parse input threshold dari text_input.
-    Kembalikan (value, is_using_default).
-    Kembalikan (None, False) jika input tidak valid.
-    """
+    # Parse input threshold dari text_input.
+    # Kembalikan (value, is_using_default).
+    # Kembalikan (None, False) jika input tidak valid.
     stripped = raw_input.strip() if raw_input else ""
     if not stripped:
         return default_value, True
@@ -386,10 +369,8 @@ def parse_threshold_input(raw_input, default_value):
 
 
 def run_association_rules_for_level(df, item_col, min_support, min_confidence, min_lift=1.0):
-    """
-    Jalankan FP-Growth + association rules untuk satu level hierarki produk.
-    Mengembalikan (rules_df, error_message, covered_items_list).
-    """
+    # Jalankan FP-Growth + association rules untuk satu level hierarki produk.
+    # Mengembalikan (rules_df, error_message, covered_items_list).
     if item_col not in df.columns:
         return pd.DataFrame(), f"Kolom '{item_col}' tidak ditemukan.", []
 
@@ -419,18 +400,17 @@ def run_association_rules_for_level(df, item_col, min_support, min_confidence, m
 # DATABASE FUNCTIONS
 # =============================================================================
 
-def create_db_engine(host, port, db_name, username, password):
-    """Buat SQLAlchemy engine untuk koneksi ke PostgreSQL."""
-    connection_string = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}"
+def create_db_engine():
+    # Buat SQLAlchemy engine untuk koneksi ke PostgreSQL.
+    connection_string = st.secrets["DATABASE_URL"]
     return create_engine(connection_string)
 
 
 def save_dataframe_to_db(df, engine, table_name):
-    """
-    Simpan dataframe ke tabel PostgreSQL dengan deduplication otomatis.
-    Hanya baris yang belum ada di DB (berdasarkan No. Pesanan + Nama Produk) yang diinsert.
-    Mengembalikan dict ringkasan hasil operasi.
-    """
+    # Simpan dataframe ke tabel PostgreSQL dengan deduplication otomatis.
+    # Hanya baris yang belum ada di DB (berdasarkan No. Pesanan + Nama Produk) yang diinsert.
+    # Mengembalikan dict ringkasan hasil operasi.
+
     result_info = {"duplicates_skipped": 0, "rows_inserted": 0, "error": None}
 
     try:
@@ -484,7 +464,7 @@ def save_dataframe_to_db(df, engine, table_name):
 
 
 def load_dataframe_from_db(engine, table_name="fact_sales"):
-    """Load seluruh data dari tabel PostgreSQL. Kembalikan (df, error_message)."""
+    # Load seluruh data dari tabel PostgreSQL. Kembalikan (df, error_message).
     try:
         df = pd.read_sql(f'SELECT * FROM "{table_name}"', engine)
         return df, None
@@ -519,11 +499,9 @@ def authenticate_user(engine, username, password):
 # =============================================================================
 
 def run_preprocessing_pipeline(raw_df, engine=None):
-    """
-    Pipeline preprocessing lengkap untuk data transaksi Shopee.
-    Tahapan: filter status → konversi tipe data → standardisasi nama produk
-             → join kategori produk → feature engineering → hapus kolom tidak perlu.
-    """
+    # Pipeline preprocessing lengkap untuk data transaksi Shopee.
+    # Tahapan: filter status → konversi tipe data → standardisasi nama produk
+    #          → join kategori produk → feature engineering → hapus kolom tidak perlu.
     df = raw_df.copy()
 
     # 1. Hapus transaksi yang dibatalkan atau belum selesai
@@ -627,10 +605,7 @@ for key, default_val in session_defaults.items():
 # Auto-connect ke database saat pertama kali aplikasi dijalankan
 if not st.session_state.db_connected:
     try:
-        engine = create_db_engine(
-            DB_DEFAULT["host"], DB_DEFAULT["port"],
-            DB_DEFAULT["name"], DB_DEFAULT["user"], DB_DEFAULT["pass"]
-        )
+        engine = create_db_engine()
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         st.session_state.db_engine    = engine
@@ -688,23 +663,6 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("**Konfigurasi Database**")
-    db_host = st.text_input("Host",     value=DB_DEFAULT["host"], key="db_host")
-    db_port = st.text_input("Port",     value=DB_DEFAULT["port"], key="db_port")
-    db_name = st.text_input("Database", value=DB_DEFAULT["name"], key="db_name")
-    db_user = st.text_input("Username", value=DB_DEFAULT["user"], key="db_user")
-    db_pass = st.text_input("Password", value=DB_DEFAULT["pass"], type="password", key="db_pass")
-
-    if st.button("Test / Reconnect DB", use_container_width=True):
-        try:
-            engine = create_db_engine(db_host, db_port, db_name, db_user, db_pass)
-            with engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
-            st.session_state.db_engine    = engine
-            st.session_state.db_connected = True
-            st.success("Koneksi berhasil")
-        except Exception as error:
-            st.session_state.db_connected = False
-            st.error(f"Gagal: {error}")
 
     if st.session_state.db_connected:
         st.success("● DB Terhubung")
