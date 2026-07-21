@@ -497,6 +497,44 @@ def authenticate_user(engine, username, password):
         password
     )
 
+def update_user_password(engine, username, old_password, new_password):
+    # Ubah password user setelah memverifikasi password lama.
+    # Mengembalikan (success: bool, message: str)
+
+    query = text("""
+        SELECT username, password
+        FROM users
+        WHERE username = :username
+        LIMIT 1
+    """)
+
+    with engine.connect() as conn:
+        result = conn.execute(query, {"username": username}).fetchone()
+
+    if result is None:
+        return False, "User tidak ditemukan."
+
+    if not check_password_hash(result.password, old_password):
+        return False, "Password lama tidak sesuai."
+
+    new_password_hash = generate_password_hash(new_password)
+
+    update_query = text("""
+        UPDATE users
+        SET password = :new_password
+        WHERE username = :username
+    """)
+
+    try:
+        with engine.begin() as conn:
+            conn.execute(
+                update_query,
+                {"new_password": new_password_hash, "username": username}
+            )
+        return True, "Password berhasil diubah."
+    except Exception as error:
+        return False, f"Gagal mengubah password: {error}"
+    
 # =============================================================================
 # PREPROCESSING PIPELINE
 # =============================================================================
@@ -663,6 +701,7 @@ with st.sidebar:
         "Multilevel Association Rules",
         "Multidimensional Association Rules",
         "Sequential Pattern Mining",
+        "Ganti Password", 
     ])
 
     st.markdown("---")
@@ -1732,3 +1771,36 @@ elif selected_menu == "Sequential Pattern Mining":
                         display_patterns = display_patterns.sort_values(sort_column, ascending=sort_ascending).head(top_n)
 
                         st.dataframe(display_patterns, use_container_width=True)
+
+elif selected_menu == "Ganti Password":
+    st.title("Ganti Password")
+    st.write("Ubah password akun Anda. Password lama harus dimasukkan untuk verifikasi.")
+
+    _, col_center, _ = st.columns([1, 1.5, 1])
+    with col_center:
+        with st.form("form_ganti_password", clear_on_submit=True):
+            old_password     = st.text_input("Password Lama", type="password")
+            new_password     = st.text_input("Password Baru", type="password")
+            confirm_password = st.text_input("Konfirmasi Password Baru", type="password")
+            submitted = st.form_submit_button("Simpan Perubahan", type="primary", use_container_width=True)
+
+        if submitted:
+            if not old_password or not new_password or not confirm_password:
+                st.error("Semua kolom harus diisi.")
+            elif len(new_password) < 8:
+                st.error("Password baru minimal 8 karakter.")
+            elif new_password != confirm_password:
+                st.error("Konfirmasi password baru tidak cocok.")
+            elif new_password == old_password:
+                st.warning("Password baru tidak boleh sama dengan password lama.")
+            else:
+                success, message = update_user_password(
+                    st.session_state.db_engine,
+                    st.session_state.username,
+                    old_password,
+                    new_password
+                )
+                if success:
+                    st.success(message)
+                else:
+                    st.error(message)
